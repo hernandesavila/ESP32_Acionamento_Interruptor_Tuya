@@ -11,7 +11,7 @@ const char* password = "SENHA_WIFI";
 
 // Credenciais da Tuya (do Developer Platform)
 const char* accessKey = "ACCESS_KEY";              // client_id
-const char* secretKey = "SECRETE_KEY";  // secret
+const char* secretKey = "SECRET_KEY";  // secret
 const char* deviceId = "DEVICE_ID";
 
 // Variáveis globais para token e expiração (em milissegundos)
