@@ -11,7 +11,7 @@ const char* password = "SENHA_WIFI";
 
 // Credenciais da Tuya (do Developer Platform)
 const char* accessKey = "ACCESS_KEY";              // client_id
-const char* secretKey = "SECRET_KEY";  // secret
+const char* secretKey = "SECRET";  // secret
 const char* deviceId = "DEVICE_ID";
 
 // Variáveis globais para token e expiração (em milissegundos)
@@ -165,6 +165,51 @@ String computeCommandSignature(String httpMethod, String urlPath, String body, S
   return sign;
 }
 
+bool getDeviceStatus() {
+    if (getTimestamp() >= tokenExpiration) {
+        Serial.println("Token expirado. Obtendo novo token...");
+        accessToken = getToken();
+    }
+
+    String urlPath = "/v1.0/devices/" + String(deviceId) + "/status";
+    String httpMethod = "GET";
+    String timestamp = String(getTimestamp());
+    String nonce = String(random(10000000, 99999999));
+    String sign = computeCommandSignature(httpMethod, urlPath, "", timestamp, nonce, accessToken);
+
+    HTTPClient http;
+    String fullUrl = "https://openapi.tuyaus.com" + urlPath;
+    http.begin(fullUrl);
+
+    http.addHeader("client_id", accessKey);
+    http.addHeader("access_token", accessToken);
+    http.addHeader("t", timestamp);
+    http.addHeader("nonce", nonce);
+    http.addHeader("sign", sign);
+    http.addHeader("sign_method", "HMAC-SHA256");
+
+    Serial.println("Enviando comando para: " + fullUrl);
+    
+    int httpCode = http.GET();
+    String response = http.getString();
+    Serial.println("Status Response: " + response);
+    http.end();
+
+    if (httpCode == 200) {
+        DynamicJsonDocument doc(1024);
+        deserializeJson(doc, response);
+        if (doc["success"]) {
+            JsonArray statusArray = doc["result"].as<JsonArray>();
+            for (JsonObject status : statusArray) {
+                if (status["code"] == "switch_1") {
+                    return status["value"];
+                }
+            }
+        }
+    }
+    return false;
+}
+
 void sendCommand(bool turnOn) {
   // Antes de enviar o comando, verifica se o token expirou
   if (getTimestamp() >= tokenExpiration) {
@@ -232,9 +277,9 @@ void loop() {
 
     if (accessToken.length() > 0) {
       // Alterna o estado do dispositivo
-      deviceState = !deviceState;
-      Serial.println("Botão pressionado! Alterando estado para: " + String(deviceState ? "LIGAR" : "DESLIGAR"));
-      sendCommand(deviceState);
+      deviceState = getDeviceStatus();
+      Serial.println("Botão pressionado! Alterando estado para: " + String(!deviceState ? "LIGAR" : "DESLIGAR"));
+      sendCommand(!deviceState);
     }
   }
 
