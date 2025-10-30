@@ -9,7 +9,6 @@ Projeto em **Arduino** para **ESP32** que realiza o acionamento remoto de um int
 <p align="center">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/arduino/arduino-original.svg" alt="Arduino" width="30" height="30"/>
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg" alt="C++" width="30" height="30"/>
-  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/esp32/esp32-original.svg" alt="ESP32" width="30" height="30"/>
 </p>
 
 - **ESP32** – microcontrolador principal
